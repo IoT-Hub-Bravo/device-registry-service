@@ -41,7 +41,7 @@ INSTALLED_APPS += [
 # Local apps
 
 INSTALLED_APPS += [
-    'apps.template'
+    'apps.registry'
 ]
 
 MIDDLEWARE = [
