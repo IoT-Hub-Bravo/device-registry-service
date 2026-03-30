@@ -50,20 +50,5 @@ RUN addgroup --gid 10001 --system django && \
 # copy application files
 COPY --chown=django:django ./src/ /app/
 
-# copy entrypoint
-COPY --chown=django:django ./docker/django/entrypoint.sh /entrypoint.sh
-RUN sed -i "s/\r$//g" /entrypoint.sh
-
-# copy prod start script
-COPY --chown=django:django ./docker/django/start-web.sh /start-web.sh
-RUN sed -i "s/\r$//g" /start-web.sh
-
-# copy dev start script
-COPY --chown=django:django ./docker/django/start-web-dev.sh /start-web-dev.sh
-RUN sed -i "s/\r$//g" /start-web-dev.sh
-
-# change scripts permissions
-RUN chmod 555 /entrypoint.sh /start-web.sh /start-web-dev.sh
-
 # switch to created user
 USER django
