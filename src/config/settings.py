@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 import os
 from decouple import config, Csv
@@ -33,16 +31,12 @@ INSTALLED_APPS = [
 
 # Third party apps
 
-INSTALLED_APPS += [
-    'corsheaders'
-]
+INSTALLED_APPS += ['corsheaders']
 
 
 # Local apps
 
-INSTALLED_APPS += [
-    'apps.template'
-]
+INSTALLED_APPS += ['apps.template']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -99,7 +93,6 @@ else:
     }
 
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -140,16 +133,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOW_ALL_ORIGINS = config(
-    'CORS_ALLOW_ALL_ORIGINS',
-    default=False,
-    cast=bool
-)
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='',
-    cast=lambda v: v.split(',') if v else []
+    'CORS_ALLOWED_ORIGINS', default='', cast=lambda v: v.split(',') if v else []
 )
 CORS_ALLOW_CREDENTIALS = True
 
@@ -165,9 +152,7 @@ CORS_ALLOW_METHODS = [
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
 CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:5173',
-    cast=Csv()
+    'CORS_ALLOWED_ORIGINS', default='http://localhost:3000,http://localhost:5173', cast=Csv()
 )
 
 CORS_ALLOW_CREDENTIALS = True

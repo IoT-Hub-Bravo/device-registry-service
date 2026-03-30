@@ -1,0 +1,8 @@
+openapi: 3.0.3
+
+info:
+  title: IoT Hub API
+  version: "1.4.1"
+  description: |
+    API for managing devices, telemetry, and rules with full CRUD support, JWT authentication,
+    pagination, schema versioning, and example payloads for testing.
