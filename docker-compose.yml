@@ -1,1 +1,156 @@
  
+name: ${COMPOSE_PROJECT_NAME:-iot-hub}
+
+x-django-base: &django_base
+  build:
+    context: .
+    dockerfile: ./docker/django/Dockerfile
+    target: run-stage
+  restart: unless-stopped
+  env_file:
+    - ./.env
+  networks:
+    - backend
+  depends_on:
+    db:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    restart: always
+    ports:
+      - "5433:8080"
+    environment:
+      SWAGGER_JSON: /docs/api.yaml
+    volumes:
+      - ./docs:/docs
+    networks:
+      - backend
+
+  web:
+    <<: *django_base
+    image: iot-hub-web
+    container_name: web
+    volumes:
+      - media_data:/app/media
+    ports:
+      - "8000:8000"
+
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.0-alpine3.19
+    command: redis-server --appendonly yes
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  worker:
+    <<: *django_base
+    image: iot-hub-worker
+    container_name: worker
+    command: [ "celery", "-A", "conf.celery_app", "worker", "-l", "INFO", "--concurrency=${CELERY_CONCURRENCY:-2}" ]
+
+  flower:
+    image: mher/flower:2.0
+    container_name: flower
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_FLOWER_USER: ${CELERY_FLOWER_USER}
+      CELERY_FLOWER_PASSWORD: ${CELERY_FLOWER_PASSWORD}
+    command:
+      - "celery"
+      - "--broker=${CELERY_BROKER_URL}"
+      - "flower"
+      - "--port=5555"
+      - "--basic_auth=${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}"
+      - "--persistent=true"
+      - "--db=/data/flower.db"
+    volumes:
+      - flower_data:/data
+    ports:
+      - "5555:5555"
+    networks:
+      - backend
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  celery_exporter:
+    image: danihodovic/celery-exporter
+    platform: linux/amd64
+    container_name: celery_exporter
+    command: --broker-url=${CELERY_BROKER_URL}
+    ports:
+      - "9808:9808"
+    networks:
+      - backend
+    depends_on:
+      - redis
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://celery_exporter:9808/metrics')" ]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  celery_beat:
+    <<: *django_base
+    image: iot-hub-beat
+    container_name: celery_beat
+    command: [ "celery", "-A", "conf.celery_app", "beat", "-l", "INFO", "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler" ]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  kafka-audit-writer:
+    <<: *django_base
+    image: iot-hub-audit-writer
+    container_name: kafka-audit-writer
+    command: [ "python", "-m", "consumers.audit_writer" ]
+    environment:
+      KAFKA_GROUP_ID: audit-writer
+
+volumes:
+  media_data:
+  db_data:
+  redis_data:
+  flower_data:
+
+networks:
+  backend:
+    driver: bridge
