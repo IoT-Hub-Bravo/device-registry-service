@@ -96,23 +96,3 @@ RUN mkdir -p /tmp/prometheus_multiproc && \
 USER django
 
 EXPOSE 8000
-
-ENTRYPOINT ["/entrypoint.sh"]
-
-CMD ["/start-web.sh"]
-
-
-FROM run-stage AS dev-stage
-
-USER root
-
-COPY --from=build-dev-stage /wheels-dev /wheels-dev
-COPY ./src/requirements-dev.txt /app/requirements-dev.txt
-
-RUN python -m pip install --no-cache-dir --no-index --find-links=/wheels-dev \
-    -r /app/requirements-dev.txt \
-    && rm -rf /wheels-dev /app/requirements-dev.txt
-
-USER django
-
-CMD ["/start-web-dev.sh"]
