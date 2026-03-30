@@ -22,14 +22,6 @@ RUN python -m pip install --upgrade pip wheel \
     && python -m pip wheel --no-cache-dir --wheel-dir /wheels \
     -r /app/requirements.txt
 
-# dev
-FROM build-stage AS build-dev-stage
-
-COPY ./src/requirements-dev.txt /app/requirements-dev.txt
-
-RUN python -m pip wheel --no-cache-dir --wheel-dir /wheels-dev \
-    -r /app/requirements-dev.txt
-
 
 FROM base AS runtime-deps-stage
 
@@ -48,19 +40,6 @@ RUN python -m pip install --no-index --find-links=/wheels \
     && rm -rf /wheels /app/requirements.txt
 
 
-FROM runtime-deps-stage AS staticfiles-stage
-
-# copy application files & collect static files
-COPY ./src/ /app/
-
-ENV BUILD_TIME=1
-
-ENV DJANGO_SETTINGS_MODULE=config.settings \
-    SECRET_KEY=unsafe-build-time-secret-do-not-use-in-production
-
-RUN python manage.py collectstatic --noinput
-
-
 FROM runtime-deps-stage AS run-stage
 
 # create user with limited permissions
@@ -70,7 +49,6 @@ RUN addgroup --gid 10001 --system django && \
 
 # copy application files
 COPY --chown=django:django ./src/ /app/
-COPY --from=staticfiles-stage --chown=django:django /app/staticfiles /app/staticfiles
 
 # copy entrypoint
 COPY --chown=django:django ./docker/django/entrypoint.sh /entrypoint.sh
@@ -87,12 +65,5 @@ RUN sed -i "s/\r$//g" /start-web-dev.sh
 # change scripts permissions
 RUN chmod 555 /entrypoint.sh /start-web.sh /start-web-dev.sh
 
-# create prometheus multiprocess directory with correct permissions
-RUN mkdir -p /tmp/prometheus_multiproc && \
-    chown django:django /tmp/prometheus_multiproc && \
-    chmod 755 /tmp/prometheus_multiproc
-
 # switch to created user
 USER django
-
-EXPOSE 8000
