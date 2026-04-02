@@ -7,3 +7,4 @@ pytest==9.0.2
 pytest-django==4.10.0
 pytest-cov==6.1.0
 iot-hub-shared @ git+https://github.com/IoT-Hub-Bravo/python-service-libs.git
+gunicorn
