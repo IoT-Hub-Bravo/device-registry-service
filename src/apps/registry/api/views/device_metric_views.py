@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from apps.registry.models import Device, Metric, DeviceMetric
 from apps.registry.api.serializers import DeviceMetricOutputSerializer
 from apps.registry.api.utils import parse_json_body
+from apps.registry.services.kafka_publisher import DeviceEventPublisher
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -35,6 +36,7 @@ class DeviceMetricView(View):
                 {"error": "This metric is already bound to the device"}, status=409
             )
 
+        DeviceEventPublisher.get_instance().device_metric_created(device, metric)
         return JsonResponse(
             DeviceMetricOutputSerializer.to_representation(dm), status=201
         )
@@ -44,5 +46,6 @@ class DeviceMetricView(View):
 class DeviceMetricDetailView(View):
     def delete(self, request, device_pk: int, metric_pk: int):
         dm = get_object_or_404(DeviceMetric, device_id=device_pk, metric_id=metric_pk)
+        DeviceEventPublisher.get_instance().device_metric_deleted(dm.device, dm.metric)
         dm.delete()
         return JsonResponse({}, status=204)
