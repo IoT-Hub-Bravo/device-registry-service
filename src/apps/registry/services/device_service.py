@@ -1,3 +1,5 @@
+from django.db import IntegrityError
+
 from apps.registry.models import Device
 from apps.registry.services.kafka_publisher import DeviceEventPublisher
 
@@ -5,7 +7,10 @@ from apps.registry.services.kafka_publisher import DeviceEventPublisher
 class DeviceService:
     @staticmethod
     def create_device(**data) -> Device:
-        device = Device.objects.create(**data)
+        try:
+            device = Device.objects.create(**data)
+        except IntegrityError:
+            raise RuntimeError("Device with the same serial_id already exists")
         DeviceEventPublisher.get_instance().device_created(device)
         return device
 
@@ -14,7 +19,10 @@ class DeviceService:
         for key, value in data.items():
             if value is not None:
                 setattr(instance, key, value)
-        instance.save()
+        try:
+            instance.save()
+        except IntegrityError:
+            raise RuntimeError("Device with the same serial_id already exists")
         DeviceEventPublisher.get_instance().device_updated(instance)
         return instance
 
