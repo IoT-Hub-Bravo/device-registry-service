@@ -3,8 +3,8 @@ from .metric import Metric, MetricDataType
 from .device_metric import DeviceMetric
 
 __all__ = [
-    'Device',
-    'Metric',
-    'MetricDataType',
-    'DeviceMetric',
+    "Device",
+    "Metric",
+    "MetricDataType",
+    "DeviceMetric",
 ]

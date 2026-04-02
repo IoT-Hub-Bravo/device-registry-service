@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('registry', '0001_create_collation'),
+        ("registry", "0001_create_collation"),
     ]
 
     operations = [
