@@ -1,8 +1,20 @@
 name: ${COMPOSE_PROJECT_NAME:-device-registry-service}
 
 services:
-
-volumes:
+  device-registry:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - ../.env
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - iot-hub-nw
+    restart: unless-stopped
 
 networks:
   iot-hub-nw:
