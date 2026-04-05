@@ -1,100 +1,66 @@
-from typing import Any
+from typing import Any, Optional
+
+from iot_hub_shared.serializer_kit import JSONSerializer
 
 
-class DeviceCreateSerializer:
-    required_fields = ("serial_id", "name", "user_id")
-    FIELD_TYPES = {
+class DeviceCreateSerializer(JSONSerializer):
+    REQUIRED_FIELDS = {
         "serial_id": str,
         "name": str,
-        "description": (str, type(None)),
         "user_id": int,
+    }
+    OPTIONAL_FIELDS = {
+        "description": (str, type(None)),
         "is_active": bool,
     }
 
-    def __init__(self, data: dict[str, Any] | None = None):
-        self.initial_data = data or {}
-        self._validated_data = None
-        self._errors = None
+    def _validate_fields(self, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+        serial_id = data["serial_id"].strip()
+        name = data["name"].strip()
 
-    def is_valid(self) -> bool:
-        self._errors = {}
-        self._validated_data = {}
-
-        if not isinstance(self.initial_data, dict):
-            self._errors["non_field_errors"] = "Invalid data format"
-            return False
-
-        for field in self.required_fields:
-            if field not in self.initial_data or self.initial_data[field] in ("", None):
-                self._errors[field] = "This field is required."
+        if not serial_id:
+            self._errors["serial_id"] = "serial_id must be a non-empty string."
+        if not name:
+            self._errors["name"] = "name must be a non-empty string."
 
         if self._errors:
-            return False
+            return None
 
-        for field, expected_type in self.FIELD_TYPES.items():
-            if field in self.initial_data:
-                value = self.initial_data[field]
-                if not isinstance(value, expected_type):
-                    self._errors[field] = f"'{field}' must be a valid value."
-                elif isinstance(value, str):
-                    self._validated_data[field] = value.strip()
-                else:
-                    self._validated_data[field] = value
-
-        return not bool(self._errors)
-
-    @property
-    def validated_data(self):
-        if self._validated_data is None:
-            raise RuntimeError("Call .is_valid() before accessing .validated_data")
-        return self._validated_data
-
-    @property
-    def errors(self):
-        return self._errors or {}
+        return {
+            "serial_id": serial_id,
+            "name": name,
+            "user_id": data["user_id"],
+            "description": data.get("description"),
+            "is_active": data.get("is_active", True),
+        }
 
 
-class DeviceUpdateSerializer:
-    FIELD_TYPES = {
+class DeviceUpdateSerializer(JSONSerializer):
+    REQUIRED_FIELDS = {}
+    OPTIONAL_FIELDS = {
         "name": str,
         "description": (str, type(None)),
         "is_active": bool,
     }
+    STRICT_SCHEMA = True
 
-    def __init__(self, data: dict[str, Any] | None = None):
-        self.initial_data = data or {}
-        self._validated_data = None
-        self._errors = None
+    def _validate_fields(self, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+        validated = {}
 
-    def is_valid(self) -> bool:
-        self._errors = {}
-        self._validated_data = {}
+        if "name" in data:
+            name = data["name"].strip()
+            if not name:
+                self._errors["name"] = "name must be a non-empty string."
+                return None
+            validated["name"] = name
 
-        if not isinstance(self.initial_data, dict):
-            self._errors["non_field_errors"] = "Invalid data format"
-            return False
+        if "description" in data:
+            validated["description"] = data["description"]
 
-        for field, expected_type in self.FIELD_TYPES.items():
-            if field in self.initial_data:
-                value = self.initial_data[field]
-                if not isinstance(value, expected_type):
-                    self._errors[field] = f"'{field}' must be a valid value."
-                elif isinstance(value, str):
-                    self._validated_data[field] = value.strip()
-                else:
-                    self._validated_data[field] = value
+        if "is_active" in data:
+            validated["is_active"] = data["is_active"]
 
-        return not bool(self._errors)
-
-    @property
-    def validated_data(self):
-        if self._validated_data is None:
-            raise RuntimeError("Call .is_valid() before accessing .validated_data")
-        return self._validated_data
-
-    @property
-    def errors(self):
-        return self._errors or {}
+        return validated
 
 
 class DeviceOutputSerializer:

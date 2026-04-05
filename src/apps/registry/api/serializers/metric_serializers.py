@@ -1,99 +1,67 @@
-from typing import Any
+from typing import Any, Optional
 
+from iot_hub_shared.serializer_kit import JSONSerializer
 from apps.registry.models import MetricDataType
 
 
-class MetricCreateSerializer:
-    required_fields = ("metric_type",)
+class MetricCreateSerializer(JSONSerializer):
+    REQUIRED_FIELDS = {
+        "metric_type": str,
+    }
+    OPTIONAL_FIELDS = {
+        "data_type": str,
+    }
+
     VALID_DATA_TYPES = [choice.value for choice in MetricDataType]
 
-    def __init__(self, data: dict[str, Any] | None = None):
-        self.initial_data = data or {}
-        self._validated_data = None
-        self._errors = None
+    def _validate_fields(self, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+        metric_type = data["metric_type"].strip()
+        if not metric_type:
+            self._errors["metric_type"] = "metric_type must be a non-empty string."
+            return None
 
-    def is_valid(self) -> bool:
-        self._errors = {}
-        self._validated_data = {}
-
-        if not isinstance(self.initial_data, dict):
-            self._errors["non_field_errors"] = "Invalid data format"
-            return False
-
-        metric_type = self.initial_data.get("metric_type")
-        if (
-            not metric_type
-            or not isinstance(metric_type, str)
-            or not metric_type.strip()
-        ):
-            self._errors["metric_type"] = "This field is required."
-            return False
-        self._validated_data["metric_type"] = metric_type.strip()
-
-        data_type = self.initial_data.get("data_type", MetricDataType.NUMERIC.value)
+        data_type = data.get("data_type", MetricDataType.NUMERIC.value)
         if data_type not in self.VALID_DATA_TYPES:
             self._errors["data_type"] = (
                 f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
             )
-            return False
-        self._validated_data["data_type"] = data_type
+            return None
 
-        return True
-
-    @property
-    def validated_data(self):
-        if self._validated_data is None:
-            raise RuntimeError("Call .is_valid() before accessing .validated_data")
-        return self._validated_data
-
-    @property
-    def errors(self):
-        return self._errors or {}
+        return {
+            "metric_type": metric_type,
+            "data_type": data_type,
+        }
 
 
-class MetricUpdateSerializer:
+class MetricUpdateSerializer(JSONSerializer):
+    REQUIRED_FIELDS = {}
+    OPTIONAL_FIELDS = {
+        "metric_type": str,
+        "data_type": str,
+    }
+    STRICT_SCHEMA = True
+
     VALID_DATA_TYPES = [choice.value for choice in MetricDataType]
 
-    def __init__(self, data: dict[str, Any] | None = None):
-        self.initial_data = data or {}
-        self._validated_data = None
-        self._errors = None
+    def _validate_fields(self, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+        validated = {}
 
-    def is_valid(self) -> bool:
-        self._errors = {}
-        self._validated_data = {}
-
-        if not isinstance(self.initial_data, dict):
-            self._errors["non_field_errors"] = "Invalid data format"
-            return False
-
-        if "metric_type" in self.initial_data:
-            value = self.initial_data["metric_type"]
-            if not isinstance(value, str) or not value.strip():
+        if "metric_type" in data:
+            metric_type = data["metric_type"].strip()
+            if not metric_type:
                 self._errors["metric_type"] = "Must be a non-empty string."
-                return False
-            self._validated_data["metric_type"] = value.strip()
+                return None
+            validated["metric_type"] = metric_type
 
-        if "data_type" in self.initial_data:
-            value = self.initial_data["data_type"]
-            if value not in self.VALID_DATA_TYPES:
+        if "data_type" in data:
+            if data["data_type"] not in self.VALID_DATA_TYPES:
                 self._errors["data_type"] = (
                     f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
                 )
-                return False
-            self._validated_data["data_type"] = value
+                return None
+            validated["data_type"] = data["data_type"]
 
-        return True
-
-    @property
-    def validated_data(self):
-        if self._validated_data is None:
-            raise RuntimeError("Call .is_valid() before accessing .validated_data")
-        return self._validated_data
-
-    @property
-    def errors(self):
-        return self._errors or {}
+        return validated
 
 
 class MetricOutputSerializer:

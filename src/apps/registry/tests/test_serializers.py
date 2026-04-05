@@ -15,11 +15,11 @@ from apps.registry.tests.factories import DeviceFactory
 class TestDeviceCreateSerializer:
     def test_valid_data(self):
         data = {"serial_id": "SN-001", "name": "Sensor", "user_id": 1}
-        s = DeviceCreateSerializer(data=data)
+        s = DeviceCreateSerializer(data)
         assert s.is_valid()
 
     def test_missing_required_fields(self):
-        s = DeviceCreateSerializer(data={})
+        s = DeviceCreateSerializer({})
         assert not s.is_valid()
         assert "serial_id" in s.errors
         assert "name" in s.errors
@@ -27,7 +27,7 @@ class TestDeviceCreateSerializer:
 
     def test_invalid_user_id_type(self):
         data = {"serial_id": "SN-001", "name": "Sensor", "user_id": "abc"}
-        s = DeviceCreateSerializer(data=data)
+        s = DeviceCreateSerializer(data)
         assert not s.is_valid()
         assert "user_id" in s.errors
 
@@ -39,7 +39,7 @@ class TestDeviceCreateSerializer:
             "description": "A sensor",
             "is_active": False,
         }
-        s = DeviceCreateSerializer(data=data)
+        s = DeviceCreateSerializer(data)
         assert s.is_valid()
         assert s.validated_data["description"] == "A sensor"
         assert s.validated_data["is_active"] is False
@@ -48,13 +48,13 @@ class TestDeviceCreateSerializer:
 class TestDeviceUpdateSerializer:
     def test_partial_update(self):
         data = {"name": "Updated"}
-        s = DeviceUpdateSerializer(data=data)
+        s = DeviceUpdateSerializer(data)
         assert s.is_valid()
         assert s.validated_data["name"] == "Updated"
 
     def test_invalid_type(self):
         data = {"is_active": "not_bool"}
-        s = DeviceUpdateSerializer(data=data)
+        s = DeviceUpdateSerializer(data)
         assert not s.is_valid()
 
 
@@ -72,12 +72,12 @@ class TestDeviceOutputSerializer:
 class TestMetricCreateSerializer:
     def test_valid_data(self):
         data = {"metric_type": "temperature", "data_type": "numeric"}
-        s = MetricCreateSerializer(data=data)
+        s = MetricCreateSerializer(data)
         assert s.is_valid()
 
     def test_missing_metric_type(self):
         data = {"data_type": "numeric"}
-        s = MetricCreateSerializer(data=data)
+        s = MetricCreateSerializer(data)
         assert not s.is_valid()
         assert "metric_type" in s.errors
 
@@ -85,6 +85,6 @@ class TestMetricCreateSerializer:
 class TestMetricUpdateSerializer:
     def test_partial_update(self):
         data = {"metric_type": "humidity"}
-        s = MetricUpdateSerializer(data=data)
+        s = MetricUpdateSerializer(data)
         assert s.is_valid()
         assert s.validated_data["metric_type"] == "humidity"

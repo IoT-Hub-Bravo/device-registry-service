@@ -3,12 +3,8 @@ from django.db import models
 
 class DeviceMetric(models.Model):
     id = models.AutoField(primary_key=True)
-    device = models.ForeignKey(
-        "registry.Device", on_delete=models.CASCADE, null=False, db_index=True
-    )
-    metric = models.ForeignKey(
-        "registry.Metric", on_delete=models.RESTRICT, null=False, db_index=True
-    )
+    device = models.ForeignKey("registry.Device", on_delete=models.CASCADE, null=False)
+    metric = models.ForeignKey("registry.Metric", on_delete=models.RESTRICT, null=False)
 
     class Meta:
         db_table = "device_metrics"

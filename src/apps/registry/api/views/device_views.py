@@ -45,12 +45,12 @@ class DeviceView(View):
         if error_response:
             return error_response
 
-        serializer = DeviceCreateSerializer(data=data)
+        serializer = DeviceCreateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
         try:
-            device = DeviceService.create_device(**serializer.validated_data)
+            device = DeviceService.create_device(serializer.validated_data)
         except RuntimeError as e:
             return JsonResponse({"error": str(e)}, status=409)
 
@@ -71,13 +71,13 @@ class DeviceDetailView(View):
         if error_response:
             return error_response
 
-        serializer = DeviceCreateSerializer(data=data)
+        serializer = DeviceCreateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
         try:
             device = DeviceService.update_device(
-                instance=device, **serializer.validated_data
+                instance=device, data=serializer.validated_data
             )
         except RuntimeError as e:
             return JsonResponse({"error": str(e)}, status=409)
@@ -90,13 +90,13 @@ class DeviceDetailView(View):
         if error_response:
             return error_response
 
-        serializer = DeviceUpdateSerializer(data=data)
+        serializer = DeviceUpdateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
         try:
             device = DeviceService.update_device(
-                instance=device, **serializer.validated_data
+                instance=device, data=serializer.validated_data
             )
         except RuntimeError as e:
             return JsonResponse({"error": str(e)}, status=409)

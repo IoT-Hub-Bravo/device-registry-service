@@ -44,7 +44,7 @@ class MetricView(View):
         if error_response:
             return error_response
 
-        serializer = MetricCreateSerializer(data=data)
+        serializer = MetricCreateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
@@ -72,7 +72,7 @@ class MetricDetailView(View):
         if error_response:
             return error_response
 
-        serializer = MetricCreateSerializer(data=data)
+        serializer = MetricCreateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
@@ -94,7 +94,7 @@ class MetricDetailView(View):
         if error_response:
             return error_response
 
-        serializer = MetricUpdateSerializer(data=data)
+        serializer = MetricUpdateSerializer(data)
         if not serializer.is_valid():
             return JsonResponse({"errors": serializer.errors}, status=400)
 
