@@ -4,6 +4,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
+from iot_hub_shared.auth_kit.middleware import login_required
+
 from apps.registry.models import Device
 from apps.registry.api.serializers import (
     DeviceCreateSerializer,
@@ -15,6 +17,7 @@ from apps.registry.services.device_service import DeviceService
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class DeviceView(View):
     def get(self, request):
         try:
@@ -60,6 +63,7 @@ class DeviceView(View):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class DeviceDetailView(View):
     def get(self, request, pk: int):
         device = get_object_or_404(Device, pk=pk)
