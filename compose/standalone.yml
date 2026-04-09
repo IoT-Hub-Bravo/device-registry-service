@@ -1,7 +1,7 @@
 name: ${COMPOSE_PROJECT_NAME:-device-registry-service}
 
 services:
-  db:
+  postgres:
     image: postgres:17
     environment:
       POSTGRES_DB: ${DB_NAME:-device_registry}
@@ -27,7 +27,7 @@ services:
     ports:
       - "8001:8000"
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
