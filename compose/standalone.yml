@@ -12,10 +12,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-device_registry_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-device_registry_user} -d ${DB_NAME:-device_registry}"]
       interval: 5s
       timeout: 3s
       retries: 5
+
 
   device-registry:
     build:
