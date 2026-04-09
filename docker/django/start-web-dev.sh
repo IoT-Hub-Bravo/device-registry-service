@@ -1,8 +1,6 @@
 #!/bin/sh
+set -e
 
-# =============================
-# Helpers
-# =============================
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
@@ -17,7 +15,4 @@ python manage.py migrate --noinput || {
 }
 log "Migrations completed."
 
-# =============================
-# Start
-# =============================
 exec python manage.py runserver 0.0.0.0:8000

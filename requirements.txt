@@ -8,4 +8,5 @@ tzdata==2025.3
 django-cors-headers==4.9.0
 pytest-django==4.10.0
 pytest-cov==6.1.0
-pytest-mock==3.14.0
+iot-hub-shared @ git+https://github.com/IoT-Hub-Bravo/python-service-libs.git
+gunicorn==25.3.0
