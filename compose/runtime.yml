@@ -4,14 +4,11 @@ services:
   device-registry:
     build:
       context: ..
-      dockerfile: docker/django/Dockerfile
+      dockerfile: docker/Dockerfile
     env_file:
       - ../.env
     ports:
       - "8001:8000"
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       - iot-hub-nw
     restart: unless-stopped
