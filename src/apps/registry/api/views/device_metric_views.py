@@ -37,9 +37,7 @@ class DeviceMetricView(View):
             )
 
         DeviceEventPublisher.get_instance().device_metric_created(device, metric)
-        return JsonResponse(
-            DeviceMetricOutputSerializer.to_representation(dm), status=201
-        )
+        return JsonResponse(DeviceMetricOutputSerializer.to_representation(dm), status=201)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

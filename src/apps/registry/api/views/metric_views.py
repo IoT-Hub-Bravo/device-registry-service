@@ -20,24 +20,18 @@ class MetricView(View):
             limit = int(request.GET.get("limit", 20))
             offset = int(request.GET.get("offset", 0))
         except ValueError:
-            return JsonResponse(
-                {"error": "limit and offset must be integers"}, status=400
-            )
+            return JsonResponse({"error": "limit and offset must be integers"}, status=400)
 
         if limit <= 0:
             return JsonResponse({"error": "Limit must be greater than 0"}, status=400)
         if offset < 0:
-            return JsonResponse(
-                {"error": "Offset must be a positive integer"}, status=400
-            )
+            return JsonResponse({"error": "Offset must be a positive integer"}, status=400)
 
         metrics_qs = Metric.objects.all().order_by("id")
         total = metrics_qs.count()
         metrics = metrics_qs[offset : offset + limit]
         data = [MetricOutputSerializer.to_representation(m) for m in metrics]
-        return JsonResponse(
-            {"total": total, "limit": limit, "offset": offset, "items": data}
-        )
+        return JsonResponse({"total": total, "limit": limit, "offset": offset, "items": data})
 
     def post(self, request):
         data, error_response = parse_json_body(request.body)
@@ -51,13 +45,9 @@ class MetricView(View):
         try:
             metric = Metric.objects.create(**serializer.validated_data)
         except Exception:
-            return JsonResponse(
-                {"error": "Metric with this type already exists"}, status=409
-            )
+            return JsonResponse({"error": "Metric with this type already exists"}, status=409)
 
-        return JsonResponse(
-            MetricOutputSerializer.to_representation(metric), status=201
-        )
+        return JsonResponse(MetricOutputSerializer.to_representation(metric), status=201)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -82,9 +72,7 @@ class MetricDetailView(View):
         try:
             metric.save()
         except Exception:
-            return JsonResponse(
-                {"error": "Metric with this type already exists"}, status=409
-            )
+            return JsonResponse({"error": "Metric with this type already exists"}, status=409)
 
         return JsonResponse(MetricOutputSerializer.to_representation(metric))
 
@@ -104,9 +92,7 @@ class MetricDetailView(View):
         try:
             metric.save()
         except Exception:
-            return JsonResponse(
-                {"error": "Metric with this type already exists"}, status=409
-            )
+            return JsonResponse({"error": "Metric with this type already exists"}, status=409)
 
         return JsonResponse(MetricOutputSerializer.to_representation(metric))
 

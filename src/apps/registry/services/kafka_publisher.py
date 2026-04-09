@@ -11,7 +11,9 @@ TOPIC = "device.registry"
 SOURCE = "device-registry-service"
 
 
-def _build_headers(event_type: str, version: str = "v1", correlation_id: str | None = None) -> dict:
+def _build_headers(
+    event_type: str, version: str = "v1", correlation_id: str | None = None
+) -> dict:
     return {
         "event_id": str(uuid.uuid4()),
         "event_type": event_type,

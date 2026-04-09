@@ -8,6 +8,4 @@ def health_check(request):
             cursor.execute("SELECT 1")
         return JsonResponse({"status": "healthy", "database": "ok"})
     except Exception as e:
-        return JsonResponse(
-            {"status": "unhealthy", "database": str(e)}, status=503
-        )
+        return JsonResponse({"status": "unhealthy", "database": str(e)}, status=503)

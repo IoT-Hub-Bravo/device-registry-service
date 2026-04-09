@@ -73,7 +73,5 @@ class DeviceOutputSerializer:
             "description": instance.description,
             "user_id": instance.user_id,
             "is_active": instance.is_active,
-            "created_at": (
-                instance.created_at.isoformat() if instance.created_at else None
-            ),
+            "created_at": (instance.created_at.isoformat() if instance.created_at else None),
         }

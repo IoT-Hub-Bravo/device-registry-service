@@ -22,9 +22,7 @@ class MetricCreateSerializer(JSONSerializer):
 
         data_type = data.get("data_type", MetricDataType.NUMERIC.value)
         if data_type not in self.VALID_DATA_TYPES:
-            self._errors["data_type"] = (
-                f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
-            )
+            self._errors["data_type"] = f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
             return None
 
         return {
@@ -55,9 +53,7 @@ class MetricUpdateSerializer(JSONSerializer):
 
         if "data_type" in data:
             if data["data_type"] not in self.VALID_DATA_TYPES:
-                self._errors["data_type"] = (
-                    f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
-                )
+                self._errors["data_type"] = f"Must be one of: {', '.join(self.VALID_DATA_TYPES)}"
                 return None
             validated["data_type"] = data["data_type"]
 

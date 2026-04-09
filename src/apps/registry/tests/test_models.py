@@ -71,10 +71,12 @@ class TestDeviceMetric:
         device_id = dm.device.id
         dm.device.delete()
         from apps.registry.models import DeviceMetric
+
         assert not DeviceMetric.objects.filter(device_id=device_id).exists()
 
     def test_restrict_delete_metric(self):
         dm = DeviceMetricFactory.create()
         from django.db.models import RestrictedError
+
         with pytest.raises(RestrictedError):
             dm.metric.delete()
