@@ -21,7 +21,7 @@ services:
   device-registry:
     build:
       context: ..
-      dockerfile: docker/django/Dockerfile
+      dockerfile: docker/Dockerfile
     env_file:
       - ../.env
     ports:
